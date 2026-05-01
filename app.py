@@ -5,7 +5,7 @@ import os
 import uuid
 
 # --- NASTAVENIA STRÁNKY ---
-st.set_page_config(page_title="Záznamník", layout="centered")
+st.set_page_config(page_title="Minúty 2026", layout="centered")
 
 # --- SÚBORY ---
 NAMES_FILE = "Zoznam_mien.txt"
@@ -126,7 +126,7 @@ def save_record_callback():
     st.session_state.action_msg = ("success", "Záznam uložený!")
 
 # --- HLAVNÁ APP ---
-st.title("Záznamník minút")
+st.title("Minúty 2026 🏄")
 
 raw_df = load_data()
 full_df_with_minutes = process_dataframe(raw_df)
@@ -161,17 +161,17 @@ if uploaded_file is not None:
             st.sidebar.error(f"Chyba: {e}")
 
 # --- SEKCIA 1: PRIDAŤ ---
-st.header("Pridať záznam")
+st.header("+ Pridať lyžiara")
 col1, col2 = st.columns(2)
 with col1:
-    st.date_input("Dátum", date.today(), key="zaznam_datum")
+    st.date_input("Dátum:", date.today(), key="zaznam_datum")
 pridat_nove = st.checkbox("+ Pridaj meno", key="pridat_nove_checkbox")
 
 with col2:
-    st.selectbox("Meno", options=load_names(), disabled=pridat_nove, key="vybrane_meno_selectbox")
+    st.selectbox("Meno:", options=load_names(), disabled=pridat_nove, key="vybrane_meno_selectbox")
 
 if pridat_nove:
-    st.text_input("Zadaj nové meno", key="input_nove_meno")
+    st.text_input("Zadaj nové meno:", key="input_nove_meno")
 
 st.text_input("Hodnota", max_chars=3, key="input_hodnota")
 col_t1, col_t2 = st.columns(2)
