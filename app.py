@@ -213,7 +213,29 @@ if not full_df_with_minutes.empty:
 
 # --- SEKCIA 3: SÚHRN ---
 st.divider()
-st.header("Súhrn")
+st.header("Súhrn minút")
+
 if not full_df_with_minutes.empty:
-    summary = full_df_with_minutes.groupby('Meno')['Minúty'].sum().reset_index()
-    st.dataframe(summary, hide_index=True, use_container_width=True)
+    # 1. Výpočet CELKOVÉHO súhrnu
+    celkovy_sum = full_df_with_minutes.groupby('Meno')['Minúty'].sum().reset_index()
+    celkovy_sum = celkovy_sum.rename(columns={'Minúty': 'Celkovo (min)'})
+
+    # 2. Výpočet súhrnu za AKTUÁLNY MESIAC
+    today = date.today()
+    mask_mesiac = (full_df_with_minutes['Date'].apply(lambda x: x.month == today.month)) & \
+                  (full_df_with_minutes['Date'].apply(lambda x: x.year == today.year))
+    
+    mesacny_df = full_df_with_minutes[mask_mesiac]
+    mesacny_sum = mesacny_df.groupby('Meno')['Minúty'].sum().reset_index()
+    mesacny_sum = mesacny_sum.rename(columns={'Minúty': 'Tento mesiac (min)'})
+
+    # 3. Spojenie tabuliek a zoradenie
+    finalny_suhrn = pd.merge(celkovy_sum, mesacny_sum, on='Meno', how='left').fillna(0)
+    finalny_suhrn['Tento mesiac (min)'] = finalny_suhrn['Tento mesiac (min)'].astype(int)
+    
+    # Zoradenie od najvyššieho po najnižšie (podľa celkových minút)
+    finalny_suhrn = finalny_suhrn.sort_values(by='Celkovo (min)', ascending=False)
+
+    st.dataframe(finalny_suhrn, hide_index=True, use_container_width=True)
+else:
+    st.info("Zatiaľ nie sú k dispozícii žiadne dáta pre súhrn.")
