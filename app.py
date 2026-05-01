@@ -239,3 +239,47 @@ if not full_df_with_minutes.empty:
     st.dataframe(finalny_suhrn, hide_index=True, use_container_width=True)
 else:
     st.info("Zatiaľ nie sú k dispozícii žiadne dáta pre súhrn.")
+
+# --- SEKCIA 4: FILTROVANÝ SÚHRN (KRAJŠÍ DIZAJN) ---
+st.divider()
+st.header("Súhrn podľa mesiacov")
+
+mesiace_map = {
+    "Apríl": 4, "Máj": 5, "Jún": 6, "Júl": 7, 
+    "August": 8, "September": 9, "Október": 10
+}
+
+# 1. Možnosť: Moderné "Pills" (tlačidlá)
+# Ak chceš, aby boli na začiatku všetky vypnuté, zmeň selection_mode na "single" alebo nechaj prázdny výber
+vybrane_názvy = st.pills(
+    "Vyber mesiace (klikni pre aktiváciu):",
+    options=list(mesiace_map.keys()),
+    selection_mode="multi"
+)
+
+# Ak tvoj Streamlit vyhodí chybu pri st.pills, použi tento zakomentovaný kód nižšie (checkboxy v stĺpcoch):
+# st.write("Vyber mesiace:")
+# cols = st.columns(len(mesiace_map))
+# vybrane_názvy = []
+# for i, (m_name, m_num) in enumerate(mesiace_map.items()):
+#     if cols[i].checkbox(m_name):
+#         vybrane_názvy.append(m_name)
+
+if not full_df_with_minutes.empty and vybrane_názvy:
+    vybrane_cisla = [mesiace_map[m] for m in vybrane_názvy]
+    
+    mask_custom = full_df_with_minutes['Date'].apply(lambda x: x.month in vybrane_cisla)
+    filtered_df = full_df_with_minutes[mask_custom]
+    
+    if not filtered_df.empty:
+        custom_sum = filtered_df.groupby('Meno')['Minúty'].sum().reset_index()
+        custom_sum.columns = ['Meno', 'Suma minút']
+        custom_sum = custom_sum.sort_values(by='Suma minút', ascending=False)
+        
+        # Zobrazenie výsledku v peknom formáte
+        st.subheader(f"Štatistika za: {', '.join(vybrane_názvy)}")
+        st.dataframe(custom_sum, hide_index=True, use_container_width=True)
+    else:
+        st.info("Pre vybrané mesiace nie sú žiadne záznamy.")
+elif not vybrane_názvy:
+    st.info("☝️ Klikni na mesiace vyššie, aby sa zobrazil súhrn.")
