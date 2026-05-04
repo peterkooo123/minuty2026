@@ -144,12 +144,15 @@ if not full_df_with_minutes.empty:
 st.sidebar.divider()
 
 # IMPORT
-uploaded_file = st.sidebar.file_uploader(
-    "Nahrať záložné CSV", 
-    type=["csv", "txt"]  # Pridanie 'txt' často pomôže mobilom "odomknúť" súbory
-)
+uploaded_file = st.sidebar.file_uploader("Nahrať záložné CSV")
+
 if uploaded_file is not None:
-    if st.sidebar.button("⚠️ Obnoviť dáta zo súboru"):
+    # Skontrolujeme koncovku manuálne, ak chceme byť opatrní
+    if not uploaded_file.name.endswith('.csv'):
+        st.sidebar.error("Prosím, nahrajte súbor vo formáte .csv")
+    else:
+        if st.sidebar.button("⚠️ Obnoviť dáta zo súboru"):
+            # ... tvoj zvyšný kód pre spracovanie ...
         try:
             imported_df = pd.read_csv(uploaded_file)
             if "ID" not in imported_df.columns:
