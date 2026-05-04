@@ -144,17 +144,17 @@ if not full_df_with_minutes.empty:
 st.sidebar.divider()
 
 # IMPORT
-uploaded_file = st.sidebar.file_uploader("Nahrať záložné CSV")
+uploaded_file = st.sidebar.file_uploader("Nahrať záložné CSV", type=None)
 
 if uploaded_file is not None:
-    # Skontrolujeme koncovku manuálne, ak chceme byť opatrní
-    if not uploaded_file.name.endswith('.csv'):
-        st.sidebar.error("Prosím, nahrajte súbor vo formáte .csv")
+    # Kontrola prípony až po nahratí, aby sme mali istotu
+    if not uploaded_file.name.lower().endswith(('.csv', '.txt')):
+        st.sidebar.error("Vyber prosím súbor s koncovkou .csv")
     else:
         if st.sidebar.button("⚠️ Obnoviť dáta zo súboru"):
-            # ... tvoj zvyšný kód pre spracovanie ...
-        try:
-            imported_df = pd.read_csv(uploaded_file)
+            try:
+                # pandas vie prečítať csv aj keď má koncovku .txt
+                imported_df = pd.read_csv(uploaded_file)
             if "ID" not in imported_df.columns:
                 imported_df["ID"] = [str(uuid.uuid4()) for _ in range(len(imported_df))]
             if "Tankovanie" not in imported_df.columns:
