@@ -144,7 +144,10 @@ if not full_df_with_minutes.empty:
 st.sidebar.divider()
 
 # IMPORT
-uploaded_file = st.sidebar.file_uploader("Nahrať záložné CSV", type="csv")
+uploaded_file = st.sidebar.file_uploader(
+    "Nahrať záložné CSV", 
+    type=["csv", "txt"]  # Pridanie 'txt' často pomôže mobilom "odomknúť" súbory
+)
 if uploaded_file is not None:
     if st.sidebar.button("⚠️ Obnoviť dáta zo súboru"):
         try:
