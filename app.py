@@ -207,9 +207,9 @@ if not full_df_with_minutes.empty:
             st.rerun()
     else: st.info("Žiadne záznamy.")
 
-# --- SEKCIA 3: SÚHRN ---
 st.divider()
 st.header("Súhrn minút")
+
 if not full_df_with_minutes.empty:
     celkovy_sum = full_df_with_minutes.groupby('Meno')['Minúty'].sum().reset_index()
     celkovy_sum = celkovy_sum.rename(columns={'Minúty': 'Celkovo (min)'})
@@ -225,11 +225,22 @@ if not full_df_with_minutes.empty:
     finalny_suhrn = pd.merge(celkovy_sum, mesacny_sum, on='Meno', how='left').fillna(0)
     finalny_suhrn['Tento mesiac (min)'] = finalny_suhrn['Tento mesiac (min)'].astype(int)
     finalny_suhrn = finalny_suhrn.sort_values(by='Celkovo (min)', ascending=False)
-    st.dataframe(finalny_suhrn, hide_index=True, use_container_width=True)
+
+    # PRIDANIE RIADKU SPOLU
+    sum_celkovo = finalny_suhrn['Celkovo (min)'].sum()
+    sum_mesiac = finalny_suhrn['Tento mesiac (min)'].sum()
+    
+    riadok_spolu = pd.DataFrame({
+        'Meno': ['--- SPOLU ---'], 
+        'Celkovo (min)': [sum_celkovo], 
+        'Tento mesiac (min)': [sum_mesiac]
+    })
+    
+    finalny_suhrn_so_spolu = pd.concat([finalny_suhrn, riadok_spolu], ignore_index=True)
+    st.dataframe(finalny_suhrn_so_spolu, hide_index=True, use_container_width=True)
 else:
     st.info("Zatiaľ žiadne dáta.")
 
-# --- SEKCIA 4: FILTROVANÝ SÚHRN ---
 st.divider()
 st.header("Súhrn podľa mesiacov")
 mesiace_map = {"Apríl": 4, "Máj": 5, "Jún": 6, "Júl": 7, "August": 8, "September": 9, "Október": 10}
@@ -244,7 +255,19 @@ if not full_df_with_minutes.empty and vybrane_názvy:
         custom_sum = filtered_df.groupby('Meno')['Minúty'].sum().reset_index()
         custom_sum.columns = ['Meno', 'Suma minút']
         custom_sum = custom_sum.sort_values(by='Suma minút', ascending=False)
+        
+        # PRIDANIE RIADKU SPOLU
+        suma_filtrovana = custom_sum['Suma minút'].sum()
+        riadok_spolu_custom = pd.DataFrame({
+            'Meno': ['--- SPOLU ---'], 
+            'Suma minút': [suma_filtrovana]
+        })
+        
+        custom_sum_so_spolu = pd.concat([custom_sum, riadok_spolu_custom], ignore_index=True)
+        
         st.subheader(f"Štatistika za: {', '.join(vybrane_názvy)}")
-        st.dataframe(custom_sum, hide_index=True, use_container_width=True)
+        st.dataframe(custom_sum_so_spolu, hide_index=True, use_container_width=True)
+    else:
+        st.info("Pre vybrané mesiace nie sú žiadne záznamy.")
 elif not vybrane_názvy:
     st.info("☝️ Klikni na mesiace vyššie.")
